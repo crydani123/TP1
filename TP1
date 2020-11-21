@@ -1,0 +1,163 @@
+import copy
+
+class grafo:
+  def __init__(self, infraiz):
+    self.raiz = aresta(infraiz)
+    global ultimos
+    ultimos = []
+  def geraultimos(self):
+    ultimos = []
+    self.raiz.percorre()
+
+class aresta:
+  def __init__(self,inf):
+    self.estado = inf
+    self.prox = []
+
+  def novoprox (self,inf):
+    self.prox.append(aresta(inf))
+
+  def imprime(self):
+    print(self.estado)
+    for x in self.prox:
+      x.imprime()
+
+  def percorre(self):
+    for x in self.prox:
+      x.percorre()
+    if self.prox == []:
+      ultimos.append(self)
+    return
+
+def popula():
+  mat = [[9,9,9],[9,9,9],[9,9,9]]
+  for x in range(3):
+    for y in range(3):
+      mat[x][y] = int(input("Digite os números do jogo de 0 a 8 sem repetir "))
+  
+  return(mat)
+
+def geraprox(matriz):
+  
+  matlist = []
+  varx = -1
+  vary = -1
+  for x in range(3):
+    for y in range(3):
+      if (matriz[x][y] == 0):
+        varx = x
+        vary = y
+
+  x = varx
+  y = vary
+
+
+  if x != 0:
+    mattemp = copy.deepcopy(matriz) 
+    valor = matriz[x-1][y]
+    mattemp[x][y] = valor
+    mattemp[x-1][y] =0
+    matlist.append(mattemp)
+
+  if y != 0:
+    mattemp = copy.deepcopy(matriz) 
+    valor = matriz[x][y-1]
+    mattemp[x][y] = valor
+    mattemp[x][y-1] = 0
+    matlist.append(mattemp)
+
+  if x != 2:
+    mattemp = copy.deepcopy(matriz) 
+    valor = matriz[x+1][y]
+    mattemp[x][y] = valor
+    mattemp[x+1][y] =0
+    matlist.append(mattemp)
+
+  if y != 2:
+    mattemp = copy.deepcopy(matriz) 
+    valor = matriz[x][y+1]
+    mattemp[x][y] = valor
+    mattemp[x][y+1] =0
+    matlist.append(mattemp)
+  
+  return(matlist)
+
+def adiciona (opcoes, nodo, arv):
+  for x in opcoes:
+    buscaL(arv.raiz,x)
+    nodo.novoprox(x)
+  return
+
+def procura(arv,objeto):
+  global contagem
+  contagem = 0  
+  arv.geraultimos()
+  for x in ultimos:
+    adiciona(geraprox(x.estado),x,arv)
+  if buscaP(arv.raiz,objeto): 
+    return contagem
+  procura(arv,objeto)
+  return contagem
+
+def buscaL(pilha,objeto):
+  pilhab = []
+  try:
+    for x in pilha:
+      if x.estado == objeto:
+        return True
+      pilhab.extend(x.prox)
+  except:
+    pilhab = pilha.prox
+
+  if pilhab != []:
+    return buscaL(pilhab,objeto)
+  return False
+
+def buscaP(nodo,objeto):
+  global caminho
+  global contagem
+  contagem += 1
+  res = False
+  if nodo.estado == objeto:
+    caminho.append(nodo.estado)
+    return True
+  if nodo.prox != []:
+    for x in nodo.prox:
+      res = buscaP(x,objeto)
+      if res:
+        caminho.append(nodo.estado)
+        return res
+  if res:
+    caminho.append(nodo.estado)
+  return res
+
+def imprimebonito (caminho):
+  for x in caminho:
+    for y in x:
+      print(y)
+    print("-----------")
+  
+#main 
+
+global caminho
+global contagem
+contagem = 0
+
+caminho =[]
+
+matfinal = [[1,2,3],[4,5,6],[7,8,0]]
+
+mat = popula()
+
+matlist = geraprox(mat)
+
+tree = grafo(mat)
+adiciona(geraprox(tree.raiz.estado),tree.raiz,tree)
+
+try:
+  print("achei procurando em ", procura(tree,matfinal), " nodos")
+except:
+  print("não encontrado")
+
+caminho = reversed(caminho)
+imprimebonito(caminho)
